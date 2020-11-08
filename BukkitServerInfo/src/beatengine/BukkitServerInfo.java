@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
@@ -20,80 +21,118 @@ public class BukkitServerInfo extends JavaPlugin
 	
 	Thread restServer;
 	
-	boolean active;
+	boolean active = false;
 	
 	@Override
 	public void onEnable(){
 		//Fired when the server enables the plugin
+		active = true;
+		getServer().broadcastMessage("ServerInfo Plugin loaded!");
 		
-		restServer = new Thread("Rest API Server"){
-			public void run(){
-				Socket socket = null;
-				Server bksrv = getServer();
-				try
-				{
-					socket = new Socket("localhost", 8088);
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-				
-				OutputStream output = null;
-				try
-				{
-					output = socket.getOutputStream();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-				InputStream input = null;
-				try
-				{
-					input = socket.getInputStream();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-				
-				while (active)
-				{
-					
-					BufferedReader buff = new BufferedReader(new InputStreamReader(input));
-					while (true)
-					{
-						try
-						{
-							if (!buff.ready())
-								break;
-						}
-						catch (IOException e)
-						{
-							e.printStackTrace();
-						}
-					}
-					PrintStream ps = new PrintStream(output, true);
-					JSONObject info = new JSONObject();
-					
-					Collection<? extends Player> onlinePlayers = bksrv.getOnlinePlayers();
-					List<Player> players = new ArrayList<>();
-					while (onlinePlayers.iterator().hasNext())
-					{
-						players.add(onlinePlayers.iterator().next());
-					}
-					info.append("players-online", players.size());
-					JSONArray jplayers = new JSONArray();
-					for (int i = 0; i < players.size(); i++)
-					{
-						jplayers.put(players.get(i).getDisplayName());
-					}
-					info.append("players", jplayers);
-					ps.println(info.toString());
-				}
+		restServer = new Thread(()->{
+			ServerSocket socket = null;
+			Socket sock = null;
+			Server bukkit = getServer();
+			try
+			{
+				socket = new ServerSocket(8088);
 			}
-		};
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+			
+			
+			
+			OutputStream output = null;
+			InputStream input = null;
+			
+			boolean active = true;
+			while (active)
+			{
+				try
+				{
+					sock = socket.accept();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+					continue;
+				}
+				
+				try
+				{
+					output = sock.getOutputStream();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+					continue;
+				}
+				
+				try
+				{
+					input = sock.getInputStream();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+					continue;
+				}
+				try
+				{
+					while (input.available()>0)
+					{
+						input.read();
+					}
+				}
+				catch (Exception exc)
+				{
+					exc.printStackTrace();
+					continue;
+				}
+				JSONObject info = new JSONObject();
+				
+				
+				Collection<? extends Player> onlinePlayers = bukkit.getOnlinePlayers();
+				List<Player> players = new ArrayList<>();
+				while (onlinePlayers.iterator().hasNext())
+				{
+					players.add(onlinePlayers.iterator().next());
+				}
+				info.append("players-online", players.size());
+				JSONArray jplayers = new JSONArray();
+				for (int i = 0; i < players.size(); i++)
+				{
+					jplayers.put(players.get(i).getDisplayName());
+				}
+				info.append("players", jplayers);
+				
+				String res = info.toString();
+				try
+				{
+					for (int i = 0; i < res.length(); i++)
+					{
+						output.write(res.charAt(i));
+					}
+				}
+				catch (Exception exc)
+				{
+					exc.printStackTrace();
+					continue;
+				}
+				try
+				{
+					sock.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+					continue;
+				}
+				
+			}
+		});
 		restServer.start();
 		
 	}
