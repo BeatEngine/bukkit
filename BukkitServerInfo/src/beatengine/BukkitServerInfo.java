@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 public class BukkitServerInfo extends JavaPlugin
@@ -96,9 +97,10 @@ public class BukkitServerInfo extends JavaPlugin
 				
 				Collection<? extends Player> onlinePlayers = bukkit.getOnlinePlayers();
 				List<Player> players = new ArrayList<>();
-				while (onlinePlayers.iterator().hasNext())
+				Iterator<? extends Player> iterator = onlinePlayers.iterator();
+				while (iterator.hasNext())
 				{
-					players.add(onlinePlayers.iterator().next());
+					players.add(iterator.next());
 				}
 				info.append("players-online", players.size());
 				JSONArray jplayers = new JSONArray();
