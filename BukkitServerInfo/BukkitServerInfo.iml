@@ -11,6 +11,6 @@
     <orderEntry type="library" name="spigot-api-1.16.4-R0.1-20201102.201831-1-sources" level="project" />
     <orderEntry type="library" name="spigot-api-1.16.4-R0.1-20201102.201831-1-shaded" level="project" />
     <orderEntry type="library" name="spigot-api-1.16.4-R0.1-20201102.201831-1-javadoc" level="project" />
-    <orderEntry type="library" name="json" level="project" />
+    <orderEntry type="library" exported="" name="json" level="project" />
   </component>
 </module>
