@@ -1,0 +1,10 @@
+name: BukkitServerInfo
+version: 1.0
+author: BeatEngine
+main: BukkitServerInfo
+api-version: 1.13.0
+website: https://github.com/BeatEngine/bukkit
+commands:
+  <command>: /serverinfo
+    description: Show infos about the plugin
+    usage: /serverinfo
